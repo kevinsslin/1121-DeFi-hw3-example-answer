@@ -22,13 +22,25 @@ contract Delegation_Test is StdCheats, Test {
         myAddr = makeAddr("studentAddr");
         taAddr = makeAddr("taAddr");
 
-        // mySecret also your address, but in bytes32 (due to slot coliision between storage in proxy and implemyAddrntation)
         // hint: observe the storage layout of Delegate and Delegation
+
+        // | Name    | Type    | Slot | Offset | Bytes | Contract                    |
+        // |---------|---------|------|--------|-------|-----------------------------|
+        // | owner   | address | 0    | 0      | 20    | src/Delegation.sol:Delegate |
+        // | _secret | bytes32 | 1    | 0      | 32    | src/Delegation.sol:Delegate |
+
+        // | Name           | Type              | Slot | Offset | Bytes | Contract                      |
+        // |----------------|-------------------|------|--------|-------|-------------------------------|
+        // | owner          | address           | 0    | 0      | 20    | src/Delegation.sol:Delegation |
+        // | _studentWallet | address           | 1    | 0      | 20    | src/Delegation.sol:Delegation |
+        // | locked         | bool              | 1    | 20     | 1     | src/Delegation.sol:Delegation |
+        // | delegate       | contract Delegate | 2    | 0      | 20    | src/Delegation.sol:Delegation |
+
         // mySecret = {0x000000000000000000000001} + {your address in bytes32};
         // why uint160? b/c address is 20 bytes, and 160 bits is the maximum number of bits that can be stored in a bytes32
         mySecret = bytes32(uint256(1) << 160 | uint160(myAddr));
 
-        // This isn't is not important, since the state that set up during construction won't affect the storage in proxy
+        // This is not important, since the state that set up during construction in implementation contract won't affect the storage in proxy
         bytes32 secretInImplementation = bytes32("secretInImplementation");
 
         vm.startPrank(taAddr);

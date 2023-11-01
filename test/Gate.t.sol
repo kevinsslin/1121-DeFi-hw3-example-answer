@@ -83,7 +83,7 @@ contract GateAttacker {
         bytes memory dataForUnlock = abi.encodeWithSignature("unlock(bytes)", bytes32ToBytes(secretFromStorage));
         gate.resolve(dataForUnlock);
     }
-    
+
     /// @notice bytes32 is different from bytes, so we need to convert it in order to call the function correctly
     function bytes32ToBytes(bytes32 _bytes32) public returns (bytes memory) {
         bytes memory bytesArray = new bytes(32);
