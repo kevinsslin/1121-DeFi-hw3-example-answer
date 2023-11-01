@@ -22,7 +22,7 @@ contract Delegation_Test is StdCheats, Test {
         myAddr = makeAddr("studentAddr");
         taAddr = makeAddr("taAddr");
 
-        // hint: observe the storage layout of Delegate and Delegation
+        // hint: observe the storage layout of Delegate and Delegation -> storage collision in slot 1
 
         // | Name    | Type    | Slot | Offset | Bytes | Contract                    |
         // |---------|---------|------|--------|-------|-----------------------------|
@@ -36,8 +36,8 @@ contract Delegation_Test is StdCheats, Test {
         // | locked         | bool              | 1    | 20     | 1     | src/Delegation.sol:Delegation |
         // | delegate       | contract Delegate | 2    | 0      | 20    | src/Delegation.sol:Delegation |
 
-        // mySecret = {0x000000000000000000000001} + {your address in bytes32};
-        // why uint160? b/c address is 20 bytes, and 160 bits is the maximum number of bits that can be stored in a bytes32
+        // mySecret (slot 1) = {0x00...00} + {bool locked (1 bytes)} + {your address (20 bytes)};
+        // why uint160? b/c address is 20 bytes, which is 160 bits 
         mySecret = bytes32(uint256(1) << 160 | uint160(myAddr));
 
         // This is not important, since the state that set up during construction in implementation contract won't affect the storage in proxy
