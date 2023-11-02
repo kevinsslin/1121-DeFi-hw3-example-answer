@@ -85,7 +85,7 @@ contract GateAttacker {
     }
 
     /// @notice bytes32 is different from bytes, so we need to convert it in order to call the function correctly
-    function bytes32ToBytes(bytes32 _bytes32) public returns (bytes memory) {
+    function bytes32ToBytes(bytes32 _bytes32) pure public returns (bytes memory) {
         bytes memory bytesArray = new bytes(32);
         for (uint256 i; i < 32; i++) {
             bytesArray[i] = _bytes32[i];

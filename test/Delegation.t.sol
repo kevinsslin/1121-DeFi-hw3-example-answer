@@ -15,6 +15,7 @@ contract Delegation_Test is StdCheats, Test {
     address public taAddr;
 
     bytes32 public mySecret;
+    bytes32 public mySecretFromStorage;
 
     function setUp() public {
         // myAddr is the address of the student wallet (i.e. your address)
@@ -36,16 +37,17 @@ contract Delegation_Test is StdCheats, Test {
         // | locked         | bool              | 1    | 20     | 1     | src/Delegation.sol:Delegation |
         // | delegate       | contract Delegate | 2    | 0      | 20    | src/Delegation.sol:Delegation |
 
-        // mySecret (slot 1) = {0x00...00} + {bool locked (1 bytes)} + {your address (20 bytes)};
-        // why uint160? b/c address is 20 bytes, which is 160 bits 
-        mySecret = bytes32(uint256(1) << 160 | uint160(myAddr));
-
         // This is not important, since the state that set up during construction in implementation contract won't affect the storage in proxy
         bytes32 secretInImplementation = bytes32("secretInImplementation");
 
         vm.startPrank(taAddr);
         delegate = new Delegate(secretInImplementation);
         delegation = new Delegation(myAddr, address(delegate));
+
+        // mySecret (slot 1) = {0x00...00} + {bool locked (1 bytes)} + {your address (20 bytes)};
+        // why uint160? b/c address is 20 bytes, which is 160 bits 
+        mySecret = bytes32(uint256(1) << 160 | uint160(myAddr));
+        mySecretFromStorage = vm.load(address(delegation), bytes32(uint256(1)));
 
         // label contracts
         vm.label(address(delegation), "Delegation");
@@ -59,6 +61,8 @@ contract Delegation_Test is StdCheats, Test {
         assertEq(delegation.owner(), taAddr);
         assertEq(delegation._studentWallet(), myAddr);
         assertEq(delegation.locked(), true);
+
+        assertEq(mySecretFromStorage, mySecret);
     }
 
     function test_answer() public {
